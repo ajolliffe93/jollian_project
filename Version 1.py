@@ -5,15 +5,52 @@ import pandas as pd #%pip install ipympl
 from retry_requests import retry
 import matplotlib.pyplot as plt #necessary to plot data
 import sys 
+from tkinter import *
 
-def select_variables(hourly_vars, daily_vars):
+from tkinter import *
+import tkinter as tk
+
+
+#Tkinter for user to input weather variable
+class dropdown_menu_app(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Weather app") #title
+
+        self.variable = StringVar(self)
+        self.variable.set(" ") #default text (none)
+
+        self.label = tk.Label(self, text="Select a weather variable") #label
+        self.label.pack(pady=20)
+
+        self.option_menu = OptionMenu(self, self.variable, "Temperature", "Relative Humidity", "Precipitation Probability") #dropdown options
+        self.option_menu.pack()
+
+        #self.entry = tk.Entry(self) #user input
+        #self.entry.pack(pady=20)
+
+        self.enter_button = tk.Button(self,text="Search", command=self.start_search)
+        self.enter_button.pack(pady=20)
+    
+    def start_search(self):
+        selected_variable = self.variable.get()
+        #search_text =  self.entry.get() # Get the text from the Entry Widget
+        print("Searching...")
+
+
+if __name__ == "__main__":
+    app = dropdown_menu_app()
+    app.mainloop()
+
+
+def select_variables(hourly_vars, daily_vars): #the user inputs the variables they would like to get from the app
 
 	params = {
 		"latitude": 40.6613,
 		"longitude": -73.9463,
 		"current": "temperature_2m",
-		"hourly": hourly_vars,
-		"daily": daily_vars,
+		"hourly": hourly_vars, #set up dropdown menu with TKinter
+		"daily": daily_vars, #set up dropdown menu with TKinter
 		"temperature_unit": "fahrenheit",
 		"wind_speed_unit": "mph",
 		"timezone": "America/New_York",
@@ -22,7 +59,7 @@ def select_variables(hourly_vars, daily_vars):
 	
 	return params
 
-def get_response(params):
+def get_response(params): #take parameters, creates a url based off of them and returns variables outputs?
 
 	# More setup
 	# Setup the Open-Meteo API client with cache and retry on error
@@ -30,16 +67,13 @@ def get_response(params):
 	retry_session = retry(cache_session, retries = 5, backoff_factor = 0.2)
 	openmeteo = openmeteo_requests.Client(session = retry_session)
 
-
-	# Obtain user's coordinates. Ideally the user would allow the app to track their location upon opening of the app and this would be done automoatically without the user needing to input anything.
-	# This app is tracking the following hourly: temperature, humditiy, precipitation probability and wind speed, and the following daily: temperature, sunrise, susnset, precipitation summary, rain summary, showers summary and snowfall summary. All of these variables are stated here in dictionary form.
 	url = "https://api.open-meteo.com/v1/forecast"
 	
 	responses = openmeteo.weather_api(url, params=params)
 
 	return responses[0]
 
-def print_location_info(response):
+def print_location_info(response): 
 
 	# Process location and get current values.
 	print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
@@ -61,9 +95,11 @@ def process_hourly(response, hourly_vars):
 
 	hourly_arrays = []
 
-	for i in range(0, len(hourly_vars)):
+	for i in range(0, len(hourly_vars)): #creates an array of hourly variables
 		ar = hourly.Variables(i).ValuesAsNumpy() 
 		hourly_arrays.append(ar)
+
+def :
 	
 	hourly_data = {"date": pd.date_range(
 		start = pd.to_datetime(hourly.Time(), unit = "s", utc = True),
