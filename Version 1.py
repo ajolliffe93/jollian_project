@@ -11,10 +11,10 @@ from tkinter import *
 import tkinter as tk
 
 
-#Tkinter for user to input weather variable
-class dropdown_menu_app(tk.Tk):
+#Tkinter for user to input weather variable; implement GUI as a class
+class weather_app(tk.Tk): #dervied from Tk class (main class of tkinter module)
     def __init__(self):
-        super().__init__()
+        super().__init__() #initiates attributes of parent class
         self.title("Weather app") #title
 
         self.variable = StringVar(self)
@@ -39,18 +39,18 @@ class dropdown_menu_app(tk.Tk):
 
 
 if __name__ == "__main__":
-    app = dropdown_menu_app()
+    app = weather_app()
     app.mainloop()
 
 
-def select_variables(hourly_vars, daily_vars): #the user inputs the variables they would like to get from the app
+def select_variables(self, hourly_vars): #function to establish variables, scope, location and units of mesaurement and assign them to a single variable, params
 
 	params = {
 		"latitude": 40.6613,
 		"longitude": -73.9463,
 		"current": "temperature_2m",
-		"hourly": hourly_vars, #set up dropdown menu with TKinter
-		"daily": daily_vars, #set up dropdown menu with TKinter
+		"hourly": hourly_vars, 
+		#"daily": daily_vars, 
 		"temperature_unit": "fahrenheit",
 		"wind_speed_unit": "mph",
 		"timezone": "America/New_York",
@@ -59,7 +59,7 @@ def select_variables(hourly_vars, daily_vars): #the user inputs the variables th
 	
 	return params
 
-def get_response(params): #take parameters, creates a url based off of them and returns variables outputs?
+def get_response(params): #creates a url (<openmeteo_sdk.WeatherApiResponse.WeatherApiResponse object at 0x14738ce50>) containing params?
 
 	# More setup
 	# Setup the Open-Meteo API client with cache and retry on error
@@ -71,9 +71,9 @@ def get_response(params): #take parameters, creates a url based off of them and 
 	
 	responses = openmeteo.weather_api(url, params=params)
 
-	return responses[0]
+	return responses[0] #index removes content from brackets? 
 
-def print_location_info(response): 
+def print_location_info(response): #gets temp (or whatever variable user selected?); shouldn't it be responses plural?
 
 	# Process location and get current values.
 	print(f"Coordinates {response.Latitude()}°N {response.Longitude()}°E")
@@ -88,30 +88,39 @@ def print_location_info(response):
 	print(f"Current temperature_2m {current_temperature_2m}")
 
 
-	# Process hourly data via array and feed data into a dataframe.
+	# Process hourly data and feed into an array
 
 def process_hourly(response, hourly_vars):
 	hourly = response.Hourly()
 
 	hourly_arrays = []
 
-	for i in range(0, len(hourly_vars)): #creates an array of hourly variables
+	for i in range(0, len(hourly_vars)): #creates an array of hourly values for variables (i) 
 		ar = hourly.Variables(i).ValuesAsNumpy() 
 		hourly_arrays.append(ar)
 
-def :
-	
-	hourly_data = {"date": pd.date_range(
-		start = pd.to_datetime(hourly.Time(), unit = "s", utc = True),
-		end = pd.to_datetime(hourly.TimeEnd(), unit = "s", utc = True),
-		freq = pd.Timedelta(seconds = hourly.Interval()),
-		inclusive = "left"
+
+def new_key_value(): #create a 4 loop that goes through hourly vars and creates new keys with new values; why do I need to create a dictionary out of the numpy array if I can create a dataframe from the array without a dictionary? 
+
+	hourly_data = {"date": pd.date_range( #.date_range is a pandas method that returns the range of equally spaced time points
+	start = pd.to_datetime(hourly.Time(), unit = "s", utc = True),
+	end = pd.to_datetime(hourly.TimeEnd(), unit = "s", utc = True),
+	freq = pd.Timedelta(seconds = hourly.Interval()),
+	inclusive = "left"
 	)}
+
+	new_dict = {} 
+
+	for var in hourly_data:
+		new_dict[var] = 'value' #where do I get value from?
+	'''
 	#create a 4 loop that goes through hourly vars and creates new keys with new values
 	hourly_data["temperature_2m"] = hourly_temperature_2m
 	hourly_data["relative_humidity_2m"] = hourly_relative_humidity_2m
 	hourly_data["precipitation_probability"] = hourly_precipitation_probability
 	hourly_data["wind_speed_10m"] = hourly_wind_speed_10m
+	'''
+
 
 	hourly_dataframe = pd.DataFrame(data = hourly_data)
 	print(hourly_dataframe)
@@ -149,3 +158,4 @@ def :
 
 	daily_dataframe = pd.DataFrame(data = daily_data)
 	print(daily_dataframe)
+    
